@@ -1,6 +1,7 @@
 FROM debian:stretch as first_stage
 
 ARG OS_CODENAME="stretch"
+ARG OS_VERSION="9.9"
 
 ENV DEBIAN_FRONTEND=noninteractive
 
