@@ -1,13 +1,31 @@
-# Debian Docker
+# Debian Linux for Docker
 
-Docker image with Debian GNU/Linux.
+A small Debian Linux base image designed for use in containers.
 
-## Synopsis
+All non-required packages were removed to create this small image. When using
+this image you may have to install some of the packages that usually are
+installed on a regular Debian Linux image.
 
-This script will create a Docker image with Debian GNU/Linux.
+## Supported tags
 
-The Docker image resulting from this script should be the one used to
-instantiate a Debian container.
+- `8.7.1`
+- `8.9.0`, `jessie`
+- `9.0.0`
+- `9.1.0`
+- `9.2.1`
+- `9.3.0`
+- `9.4.0`
+- `9.5.0`
+- `9.6.0`
+- `9.8.0`
+- `9.9.0`, `stretch`
+- `10.0.0`, `buster`, `latest`
+
+## What is Debian?
+
+> Debian is a free operating system (OS) for your computer. An operating system is the set of basic programs and utilities that make your computer run.
+
+*from* [debian.org](https://www.debian.org)
 
 ## Getting Started
 
@@ -25,80 +43,17 @@ Docker installation instructions can be found
 
 ### Usage
 
-In order to create a Docker image using this Dockerfile you need to run the
-`docker` command with a few options.
+To start a container with this image and run a shell use the following
+command (the container will be deleted after exiting the shell):
 
 ```
-docker build --squash --force-rm --no-cache --tag <USER>/<IMAGE>:<TAG> <PATH>
+$ docker run --rm -i -t fscm/debian bash
 ```
 
-* `<USER>` - *[required]* The user that will own the container image (e.g.: "johndoe").
-* `<IMAGE>` - *[required]* The container name (e.g.: "debian").
-* `<TAG>` - *[required]* The container tag (e.g.: "latest").
-* `<PATH>` - *[required]* The location of the Dockerfile folder.
+## Build
 
-A build example:
-
-```
-docker build --squash --force-rm --no-cache --tag johndoe/my_debian:latest .
-```
-
-To clean the _<none>_ image(s) left by the `--squash` option the following
-command can be used:
-
-```
-docker rmi `docker images --filter "dangling=true" --quiet`
-```
-
-### Instantiate a Container
-
-To start a container with this image and run a shell use the following command
-(the container will be deleted after exiting the shell):
-
-```
-docker run --rm -i -t johndoe/my_debian:latest bash
-```
-
-### Add Tags to the Docker Image
-
-Additional tags can be added to the image using the following command:
-
-```
-docker tag <image_id> <user>/<image>:<extra_tag>
-```
-
-### Push the image to Docker Hub
-
-After adding an image to Docker, that image can be pushed to a Docker registry... Like Docker Hub.
-
-Make sure that you are logged in to the service.
-
-```
-docker login
-```
-
-When logged in, an image can be pushed using the following command:
-
-```
-docker push <user>/<image>:<tag>
-```
-
-Extra tags can also be pushed.
-
-```
-docker push <user>/<image>:<extra_tag>
-```
-
-## Contributing
-
-1. Fork it!
-2. Create your feature branch: `git checkout -b my-new-feature`
-3. Commit your changes: `git commit -am 'Add some feature'`
-4. Push to the branch: `git push origin my-new-feature`
-5. Submit a pull request
-
-Please read the [CONTRIBUTING.md](../CONTRIBUTING.md) file for more details on how
-to contribute to this project.
+Build instructions can be found
+[here](https://github.com/fscm/docker-debian/blob/master/README.build.md).
 
 ## Versioning
 
@@ -111,8 +66,3 @@ available, see the [tags on this repository](https://github.com/fscm/docker-debi
 
 See also the list of [contributors](https://github.com/fscm/docker-debian/contributors)
 who participated in this project.
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](../LICENSE)
-file for details
