@@ -29,6 +29,9 @@ Docker installation instructions can be found
 Detailed instructions can be found on the `README.build.md` file of the
 specific release folders.
 
+- [stretch](https://github.com/fscm/docker-debian/blob/master/stretch/README.build.md)
+- [buster](https://github.com/fscm/docker-debian/blob/master/buster/README.build.md)
+
 ## Contributing
 
 1. Fork it!
