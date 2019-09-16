@@ -1,7 +1,7 @@
 FROM debian:buster as first_stage
 
 ARG OS_CODENAME="buster"
-ARG OS_VERSION="10.0"
+ARG OS_VERSION="10.1"
 
 ENV \
   LANG=C.UTF-8 \
