@@ -71,6 +71,10 @@ FROM scratch
 LABEL \
   maintainer="Frederico Martins <https://hub.docker.com/u/fscm/>"
 
+ENV \
+  LANG=C.UTF-8 \
+  DEBIAN_FRONTEND=noninteractive
+
 COPY --from=second_stage \
   / .
 
