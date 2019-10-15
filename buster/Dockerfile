@@ -68,21 +68,31 @@ RUN \
   apt-get -y -q -o Dpkg::Options::="--force-confdef" --no-install-recommends upgrade && \
 # prevent upstart and init script from running
   dpkg-divert --local --rename --add /sbin/initctl && \
-  echo -e '#!/bin/sh\nexit 101' > /usr/sbin/policy-rc.d && \
-  echo -e '#!/bin/sh\nexit 0' > /sbin/initctl && \
+  echo '#!/bin/sh' > /usr/sbin/policy-rc.d && \
+  echo 'exit 101' >> /usr/sbin/policy-rc.d && \
+  echo '#!/bin/sh' > /sbin/initctl && \
+  echo 'exit 0' >> /sbin/initctl && \
   chmod 0755 /usr/sbin/policy-rc.d /sbin/initctl && \
 # clean up and tweaks...
   apt-get clean && \
   rm -f /etc/apt/apt.conf.d/01autoremove-kernels && \
   APT_GET_CLEAN='"rm -f /var/cache/apt/archives/*.deb /var/cache/apt/archives/partial/*.deb /var/cache/apt/*.bin || true";' && \
-  echo -e "DPkg::Post-Invoke { ${APT_GET_CLEAN} };\nAPT::Update::Post-Invoke { ${APT_GET_CLEAN} };\nDir::Cache::pkgcache \"\";\nDir::Cache::srcpkgcache \"\";" >> /etc/apt/apt.conf.d/90docker-clean && \
-  echo -e "DPkg::Use-Pty \"false\";" >> /etc/apt/apt.conf.d/90docker-no-dpkg-output && \
-  echo -e "Acquire::Languages \"none\";" >> /etc/apt/apt.conf.d/90docker-no-languages && \
-  echo -e "Acquire::GzipIndexes \"true\";\nAcquire::CompressionTypes::Order:: \"gz\";" >> /etc/apt/apt.conf.d/90docker-gzip-indexes && \
-  echo -e "APT::AutoRemove::SuggestsImportant \"false\";" >> /etc/apt/apt.conf.d/90docker-autoremove-suggests && \
-  echo -e "APT::Install-Recommends \"false\";" >> /etc/apt/apt.conf.d/90docker-no-recommends && \
-  echo -e "force-unsafe-io" >> /etc/dpkg/dpkg.cfg.d/90docker-apt-speedup && \
-  echo -e "path-exclude=/usr/share/doc/*\npath-exclude=/usr/share/info/*\npath-exclude=/usr/share/locale/*\npath-exclude=/usr/share/man/*\npath-include=/usr/share/doc/*/copyright" >> /etc/dpkg/dpkg.cfg.d/90docker-excludes && \
+  echo "DPkg::Post-Invoke { ${APT_GET_CLEAN} };" > /etc/apt/apt.conf.d/90docker-clean && \
+  echo "APT::Update::Post-Invoke { ${APT_GET_CLEAN} };" >> /etc/apt/apt.conf.d/90docker-clean && \
+  echo "Dir::Cache::pkgcache \"\";" >> /etc/apt/apt.conf.d/90docker-clean && \
+  echo "Dir::Cache::srcpkgcache \"\";" >> /etc/apt/apt.conf.d/90docker-clean && \
+  echo "DPkg::Use-Pty \"false\";" > /etc/apt/apt.conf.d/90docker-no-dpkg-output && \
+  echo "Acquire::Languages \"none\";" > /etc/apt/apt.conf.d/90docker-no-languages && \
+  echo "Acquire::GzipIndexes \"true\";" > /etc/apt/apt.conf.d/90docker-gzip-indexes && \
+  echo "Acquire::CompressionTypes::Order:: \"gz\";" >> /etc/apt/apt.conf.d/90docker-gzip-indexes && \
+  echo "APT::AutoRemove::SuggestsImportant \"false\";" > /etc/apt/apt.conf.d/90docker-autoremove-suggests && \
+  echo "APT::Install-Recommends \"false\";" > /etc/apt/apt.conf.d/90docker-no-recommends && \
+  echo "force-unsafe-io" > /etc/dpkg/dpkg.cfg.d/90docker-apt-speedup && \
+  echo "path-exclude=/usr/share/doc/*" > /etc/dpkg/dpkg.cfg.d/90docker-excludes && \
+  echo "path-exclude=/usr/share/info/*" >> /etc/dpkg/dpkg.cfg.d/90docker-excludes && \
+  echo "path-exclude=/usr/share/locale/*" >> /etc/dpkg/dpkg.cfg.d/90docker-excludes && \
+  echo "path-exclude=/usr/share/man/*" >> /etc/dpkg/dpkg.cfg.d/90docker-excludes && \
+  echo "path-include=/usr/share/doc/*/copyright" >> /etc/dpkg/dpkg.cfg.d/90docker-excludes && \
   rm -rf /usr/share/info/* && \
   rm -rf /usr/share/locale/* && \
   rm -rf /usr/share/man/* && \
