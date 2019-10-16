@@ -53,7 +53,7 @@ To start a container with this image and run a shell use the following
 command (the container will be deleted after exiting the shell):
 
 ```
-$ docker run --rm -i -t fscm/debian bash
+$ docker container run --rm --interactive --tty fscm/debian bash
 ```
 
 ## Build
