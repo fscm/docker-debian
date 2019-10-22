@@ -27,10 +27,10 @@ RUN \
   rm /usr/share/debootstrap/scripts/${OS_CODENAME} && \
   cp /root/debootstrap/${OS_CODENAME} /usr/share/debootstrap/scripts/ && \
 # build structure
-  install --directory --owner=root --group=root --mode=0755 /build/usr/local && \
+  install --directory --owner=root --group=root --mode=0755 /build && \
 # copy tests
-  cp -R /root/tests /build/usr/local/ && \
-  chmod +x /build/usr/local/tests/* && \
+  install --directory --owner=root --group=root --mode=0755 /build/usr/bin && \
+  install --owner=root --group=root --mode=0755 --target-directory=/build/usr/bin /root/tests/* && \
 # debootstrap first stage
   debootstrap --variant=docker --arch=amd64 --foreign ${OS_CODENAME} /build && \
 # clean up...
