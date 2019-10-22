@@ -34,6 +34,9 @@ RUN \
 # debootstrap first stage
   debootstrap --variant=docker --arch=amd64 --foreign ${OS_CODENAME} /build && \
 # clean up...
+  rm -rf /build/boot && \
+  rm -rf /build/proc && \
+  rm -rf /build/sys && \
   echo '' > "/build/etc/resolv.conf" && \
   echo 'host' > "/build/etc/hostname"
 
@@ -99,6 +102,10 @@ RUN \
   rm -rf /var/cache/apt/* && \
   rm -rf /var/lib/apt/lists/* && \
   rm -rf /var/log/* && \
+  rm -rf /dev/.??* && \
+  rm -rf /home/.??* && \
+  rm -rf /root/.??* && \
+  rm -rf /tmp/.??* && \
   find /usr/share/doc -mindepth 1 -not -name copyright -not -type d -delete && \
   find /usr/share/doc -mindepth 1 -type d -empty -delete && \
   find /var/cache -type f -delete && \
