@@ -1,7 +1,7 @@
 FROM debian:stretch as first_stage
 
 ARG OS_CODENAME="stretch"
-ARG OS_VERSION="9.11"
+ARG OS_VERSION="9.12"
 
 ENV \
   LANG=C.UTF-8 \
