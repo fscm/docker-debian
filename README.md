@@ -27,7 +27,8 @@ installed on a regular Debian Linux image.
 - `9.12.0`, `stretch`
 - `10.0.0`
 - `10.1.0`
-- `10.2.0`, `buster`, `latest`
+- `10.2.0`
+- `10.3.0`, `buster`, `latest`
 
 ## What is Debian?
 
