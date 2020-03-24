@@ -1,9 +1,5 @@
 # Debian Linux for Docker
 
-[![Docker Pulls](https://img.shields.io/docker/pulls/fscm/debian.svg?color=black&logo=docker&logoColor=white&style=flat-square)](https://hub.docker.com/r/fscm/debian)
-[![Docker Stars](https://img.shields.io/docker/stars/fscm/debian.svg?color=black&logo=docker&logoColor=white&style=flat-square)](https://hub.docker.com/r/fscm/debian)
-[![Docker Build Status](https://img.shields.io/docker/cloud/build/fscm/debian.svg?color=black&logo=docker&logoColor=white&style=flat-square)](https://hub.docker.com/r/fscm/debian)
-
 A small Debian Linux base image designed for use in containers.
 
 All non-required packages were removed to create this small image. When using
