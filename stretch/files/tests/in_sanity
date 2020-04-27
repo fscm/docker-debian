@@ -12,29 +12,29 @@
 #
 
 # Variables
-DEBIAN_FRONTEND=noninteractive
+DEBCONF_NONINTERACTIVE_SEEN="true"
+DEBIAN_FRONTEND="noninteractive"
+
 
 echo "=== Docker Build Test ==="
 
-echo -n "[TEST] Check if apt command is installed... "
-dpkg -s apt > /dev/null 2>&1
-if [ "$?" -eq "0" ]; then
+printf '[TEST] Check if apt command is installed... '
+if dpkg -s apt > /dev/null 2>&1; then
   echo 'OK'
 else
   echo 'Failed'
   exit 1
 fi
 
-echo -n "[TEST] Check package installation with apt... "
-apt-get -qq update && apt-get -y -qq install less > /dev/null 2>&1 && less --version > /dev/null 2>&1
-if [ "$?" -eq "0" ]; then
+printf '[TEST] Check package installation with apt... '
+if (apt-get -qq update && apt-get -y -qq install less > /dev/null 2>&1 && less --version > /dev/null 2>&1); then
   echo 'OK'
 else
   echo 'Failed'
   exit 2
 fi
 
-echo -n "[TEST] Check if debootstrap dir was removed... "
+printf '[TEST] Check if debootstrap dir was removed... '
 if [ ! -e /debootstrap ]; then
   echo 'OK'
 else
@@ -42,9 +42,8 @@ else
   exit 3
 fi
 
-echo -n "[TEST] Check if packages are correctly installed... "
-MISSING=$(apt-get -qq -s install $(dpkg-query -W -f "\${Package} ") | wc -l)
-if [ "${MISSING}" -eq "0" ]; then
+printf '[TEST] Check if packages are correctly installed... '
+if [ $(apt-get -qq -s install $(dpkg-query -W -f "\${Package} ") | wc -l) -eq "0" ]; then
   echo 'OK'
 else
   echo 'Failed'
