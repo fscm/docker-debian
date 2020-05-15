@@ -1,7 +1,7 @@
 # global args
 ARG __BUILD_DIR__="/build"
 ARG OS_CODENAME="buster"
-ARG OS_VERSION="10.3"
+ARG OS_VERSION="10.4"
 ARG __USER__="root"
 ARG __WORK_DIR__="/root"
 
@@ -43,7 +43,7 @@ RUN \
     > /dev/null 2>&1 && \
 # build structure
   echo '=== creating build structure ===' && \
-  install --directory --owner=${__USER__} --group=${__USER__} --mode=0755 "${__BUILD_DIR__}" && \
+  install --directory --owner="${__USER__}" --group="${__USER__}" --mode=0755 "${__BUILD_DIR__}" && \
 # replace debootstrap script
   echo '=== replacing debootstrap scripts ===' && \
   rm -f "/usr/share/debootstrap/scripts/${OS_CODENAME}" && \
@@ -53,7 +53,7 @@ RUN \
   debootstrap --variant=docker --arch=amd64 --foreign "${OS_CODENAME}" "${__BUILD_DIR__}" && \
 # copy tests
   echo '=== copying test files ===' && \
-  install --owner=${__USER__} --group=${__USER__} --mode=0755 --target-directory="${__BUILD_DIR__}/usr/bin" "${__WORK_DIR__}/tests"/* && \
+  install --owner="${__USER__}" --group="${__USER__}" --mode=0755 --target-directory="${__BUILD_DIR__}/usr/bin" "${__WORK_DIR__}/tests"/* && \
 # clean up and tweaks...
   echo '=== first stage settings and tweaks ===' && \
   rm -rf "${__BUILD_DIR__}/boot" && \
@@ -100,8 +100,7 @@ RUN \
 # update the system
   echo '=== updating the system ===' && \
   apt-get -qq update && \
-  apt-get -y -q -o Dpkg::Options::="--force-confdef" --no-install-recommends upgrade \
-    > /dev/null 2>&1 && \
+  apt-get -y -q -o Dpkg::Options::="--force-confdef" --no-install-recommends upgrade > /dev/null 2>&1 && \
 # prevent upstart and init script from running
   echo '=== disabling upstart and init script ===' && \
   dpkg-divert --local --rename --add /sbin/initctl && \
@@ -110,7 +109,6 @@ RUN \
   echo '#!/bin/sh' > /sbin/initctl && \
   echo 'exit 0' >> /sbin/initctl && \
   chmod 0755 /usr/sbin/policy-rc.d /sbin/initctl && \
-.
 # clean up and tweaks...
   echo '=== second stage settings and tweaks ===' && \
   apt-get clean && \
