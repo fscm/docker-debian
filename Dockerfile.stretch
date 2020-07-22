@@ -26,8 +26,6 @@ WORKDIR "${__WORK_DIR__}"
 
 SHELL ["/bin/bash", "-c"]
 
-
-
 RUN \
 # build env
   echo '=== setting build env ===' && \
