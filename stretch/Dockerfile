@@ -1,152 +1,137 @@
 # global args
 ARG __BUILD_DIR__="/build"
+
+
+
+FROM debian:stretch as build
+
+ARG __BUILD_DIR__
 ARG OS_CODENAME="stretch"
 ARG OS_VERSION="9.12"
 ARG __USER__="root"
-ARG __WORK_DIR__="/root"
-
-
-
-FROM debian:stretch as first_stage
-
-ARG __BUILD_DIR__
-ARG OS_CODENAME
-ARG OS_VERSION
-ARG __USER__
-ARG __WORK_DIR__
+ARG __WORK_DIR__="/work"
 
 ENV \
   LANG="C.UTF-8" \
+  LC_ALL="C.UTF-8" \
   DEBCONF_NONINTERACTIVE_SEEN="true" \
   DEBIAN_FRONTEND="noninteractive"
 
 USER ${__USER__}
 
-COPY "files/" "${__WORK_DIR__}/"
+#COPY --chown="${__USER__}":${__USER__} "LICENSE" "files/" "${__WORK_DIR__}/"
+COPY "LICENSE" "files/" "${__WORK_DIR__}/"
 
 WORKDIR "${__WORK_DIR__}"
 
+SHELL ["/bin/bash", "-c"]
+
+
+
 RUN \
-# dependencies
-  echo '=== instaling dependencies ===' && \
-  apt-get -qq update && \
-  apt-get -qq -y -o=Dpkg::Use-Pty=0 --no-install-recommends install \
-    binutils \
-    coreutils \
-    curl \
-    debian-archive-keyring \
-    debootstrap \
-    dbus \
-    dpkg-dev \
-    vim \
-    wget \
-    > /dev/null 2>&1 && \
+# build env
+  echo '=== setting build env ===' && \
+  time { \
+    set +h && \
+    export TIMEFORMAT='=== time taken: %lR (s:%lS u:%lU)' ; \
+  } && \
 # build structure
   echo '=== creating build structure ===' && \
-  install --directory --owner=${__USER__} --group=${__USER__} --mode=0755 "${__BUILD_DIR__}" && \
-# replace debootstrap script
-  echo '=== replacing debootstrap scripts ===' && \
-  rm -f "/usr/share/debootstrap/scripts/${OS_CODENAME}" && \
-  cp "${__WORK_DIR__}/debootstrap/${OS_CODENAME}" "/usr/share/debootstrap/scripts/" && \
-# debootstrap first stage
-  echo '=== running debootstrap first stage ===' && \
-  debootstrap --variant=docker --arch=amd64 --foreign "${OS_CODENAME}" "${__BUILD_DIR__}" && \
+  time { \
+    for folder in '/licenses'; do install --directory --owner="${__USER__}" --group="${__USER__}" --mode=0755 "${__BUILD_DIR__}${folder}"; done ; \
+  } && \
+# dependencies
+  echo '=== instaling dependencies ===' && \
+  time { \
+    apt-get -qq update && \
+    apt-get -qq -y -o=Dpkg::Use-Pty=0 --no-install-recommends install \
+      binutils \
+      ca-certificates \
+      coreutils \
+      curl \
+      dbus \
+      debian-archive-keyring \
+      debootstrap \
+      dpkg-dev \
+      wget \
+      > /dev/null 2>&1 ; \
+  } && \
+# build base os
+  echo '=== building base os ===' && \
+  time { \
+    sed \
+      -i.orig \
+      -e '/in_target mount -t proc proc \/proc$/ s/$/ || true/' \
+      -e '/in_target mount -t sysfs sysfs \/sys/ s/$/ || true/' \
+      /usr/share/debootstrap/functions && \
+    debootstrap \
+      --variant='minbase' \
+      --arch=amd64 \
+      --exclude='sensible-utils' \
+      "${OS_CODENAME}" \
+      "${__BUILD_DIR__}" && \
+    install --directory --owner="${__USER__}" --group="${__USER__}" --mode=0755 "${__BUILD_DIR__}/licenses/debian" && \
+    (cd "${__BUILD_DIR__}/licenses/debian" && curl --silent --location --retry 3 --remote-name "http://ftp.debian.org/debian/doc/social-contract.txt") ; \
+  } && \
+# update base os
+  echo '=== updating base os ===' && \
+  time { \
+    echo "deb http://deb.debian.org/debian ${OS_CODENAME} main non-free contrib" > "${__BUILD_DIR__}/etc/apt/sources.list" && \
+    echo "deb http://security.debian.org/ ${OS_CODENAME}/updates main contrib non-free" >> "${__BUILD_DIR__}/etc/apt/sources.list" && \
+    echo "deb http://deb.debian.org/debian ${OS_CODENAME}-updates main contrib non-free" >> "${__BUILD_DIR__}/etc/apt/sources.list" && \
+    chroot "${__BUILD_DIR__}" apt-get -qq update && \
+    chroot "${__BUILD_DIR__}" apt-get -qq -y -o Dpkg::Options::="--force-confdef" --no-install-recommends upgrade && \
+    chroot "${__BUILD_DIR__}" apt-get clean ; \
+  } && \
 # copy tests
   echo '=== copying test files ===' && \
-  install --owner=${__USER__} --group=${__USER__} --mode=0755 --target-directory="${__BUILD_DIR__}/usr/bin" "${__WORK_DIR__}/tests"/* && \
-# clean up and tweaks...
-  echo '=== first stage settings and tweaks ===' && \
-  rm -rf "${__BUILD_DIR__}/boot" && \
-  rm -rf "${__BUILD_DIR__}/proc" && \
-  rm -rf "${__BUILD_DIR__}/sys" && \
-  echo '' > "${__BUILD_DIR__}/etc/resolv.conf" && \
-  echo 'host' > "${__BUILD_DIR__}/etc/hostname" && \
-# done
-  echo '=== first stage done! ==='
-
-
-
-FROM scratch as second_stage
-
-ARG __BUILD_DIR__
-ARG OS_CODENAME
-ARG __WORK_DIR__
-
-ENV \
-  LANG="C.UTF-8" \
-  DEBCONF_NONINTERACTIVE_SEEN="true" \
-  DEBIAN_FRONTEND="noninteractive"
-
-COPY --from=first_stage "${__BUILD_DIR__}" "/"
-
-WORKDIR "${__WORK_DIR__}"
-
-RUN \
-# 'disable' mount command
-  echo '=== disabling mount command ===' && \
-  mv /bin/mount /bin/mount.orig && \
-  ln --symbolic /bin/true /bin/mount && \
-# debootstrap second stage
-  echo '=== running debootstrap second stage ===' && \
-  /debootstrap/debootstrap --second-stage && \
-# restore mount command
-  echo '=== enabling mount command ===' && \
-  mv /bin/mount.orig /bin/mount && \
-# recreate the sources file
-  echo '=== recreating apt sources file ===' && \
-  echo "deb http://deb.debian.org/debian ${OS_CODENAME} main non-free contrib" > /etc/apt/sources.list && \
-  echo "deb http://security.debian.org/ ${OS_CODENAME}/updates main contrib non-free" >> /etc/apt/sources.list && \
-  echo "deb http://deb.debian.org/debian ${OS_CODENAME}-updates main contrib non-free" >> /etc/apt/sources.list && \
-# update the system
-  echo '=== updating the system ===' && \
-  apt-get -qq update && \
-  apt-get -y -q -o Dpkg::Options::="--force-confdef" --no-install-recommends upgrade \
-    > /dev/null 2>&1 && \
-# prevent upstart and init script from running
-  echo '=== disabling upstart and init script ===' && \
-  dpkg-divert --local --rename --add /sbin/initctl && \
-  echo '#!/bin/sh' > /usr/sbin/policy-rc.d && \
-  echo 'exit 101' >> /usr/sbin/policy-rc.d && \
-  echo '#!/bin/sh' > /sbin/initctl && \
-  echo 'exit 0' >> /sbin/initctl && \
-  chmod 0755 /usr/sbin/policy-rc.d /sbin/initctl && \
-# clean up and tweaks...
-  echo '=== second stage settings and tweaks ===' && \
-  apt-get clean && \
-  rm -f /etc/apt/apt.conf.d/01autoremove-kernels && \
-  APT_GET_CLEAN='"rm -f /var/cache/apt/archives/*.deb /var/cache/apt/archives/partial/*.deb /var/cache/apt/*.bin || true";' && \
-  echo "DPkg::Post-Invoke { ${APT_GET_CLEAN} };" > /etc/apt/apt.conf.d/90docker-clean && \
-  echo "APT::Update::Post-Invoke { ${APT_GET_CLEAN} };" >> /etc/apt/apt.conf.d/90docker-clean && \
-  echo "Dir::Cache::pkgcache \"\";" >> /etc/apt/apt.conf.d/90docker-clean && \
-  echo "Dir::Cache::srcpkgcache \"\";" >> /etc/apt/apt.conf.d/90docker-clean && \
-  echo "DPkg::Use-Pty \"false\";" > /etc/apt/apt.conf.d/90docker-no-dpkg-output && \
-  echo "Acquire::Languages \"none\";" > /etc/apt/apt.conf.d/90docker-no-languages && \
-  echo "Acquire::GzipIndexes \"true\";" > /etc/apt/apt.conf.d/90docker-gzip-indexes && \
-  echo "Acquire::CompressionTypes::Order:: \"gz\";" >> /etc/apt/apt.conf.d/90docker-gzip-indexes && \
-  echo "APT::AutoRemove::SuggestsImportant \"false\";" > /etc/apt/apt.conf.d/90docker-autoremove-suggests && \
-  echo "APT::Install-Recommends \"false\";" > /etc/apt/apt.conf.d/90docker-no-recommends && \
-  echo "force-unsafe-io" > /etc/dpkg/dpkg.cfg.d/90docker-apt-speedup && \
-  echo "path-exclude=/usr/share/doc/*" > /etc/dpkg/dpkg.cfg.d/90docker-excludes && \
-  echo "path-exclude=/usr/share/info/*" >> /etc/dpkg/dpkg.cfg.d/90docker-excludes && \
-  echo "path-exclude=/usr/share/locale/*" >> /etc/dpkg/dpkg.cfg.d/90docker-excludes && \
-  echo "path-exclude=/usr/share/man/*" >> /etc/dpkg/dpkg.cfg.d/90docker-excludes && \
-  echo "path-include=/usr/share/doc/*/copyright" >> /etc/dpkg/dpkg.cfg.d/90docker-excludes && \
-  rm -rf "/usr/share/info"/* && \
-  rm -rf "/usr/share/locale"/* && \
-  rm -rf "/usr/share/man"/* && \
-  rm -rf "/var/cache/apt"/* && \
-  rm -rf "/var/lib/apt/lists"/* && \
-  rm -rf "/var/log"/* && \
-  rm -rf "/dev"/.??* && \
-  rm -rf "/home"/.??* && \
-  rm -rf "/root"/.??* && \
-  rm -rf "/tmp"/.??* && \
-  find "/usr/share/doc" -mindepth 1 -not -type d -not -name 'copyright' -delete && \
-  find "/usr/share/doc" -mindepth 1 -type d -empty -delete && \
-  find "/var/cache" -type f -delete && \
-# check version
-  echo '=== os version ===' && \
-  cat "/etc/debian_version" && \
+  time { \
+    install --owner="${__USER__}" --group="${__USER__}" --mode=0755 --target-directory="${__BUILD_DIR__}/usr/bin" "${__WORK_DIR__}/tests"/* ; \
+  } && \
+# system settings / cleanup
+  echo '=== system settings / cleaning up ===' && \
+  time { \
+    rm -f "${__BUILD_DIR__}/etc/apt/apt.conf.d/01autoremove-kernels" && \
+    APT_GET_CLEAN='"rm -f /var/cache/apt/archives/*.deb /var/cache/apt/archives/partial/*.deb /var/cache/apt/*.bin || true";' && \
+    printf 'DPkg::Post-Invoke { %s };\nAPT::Update::Post-Invoke { %s };\nDir::Cache::pkgcache "";\nDir::Cache::srcpkgcache "";\n' "${APT_GET_CLEAN}" "${APT_GET_CLEAN}" > "${__BUILD_DIR__}/etc/apt/apt.conf.d/90docker-clean" && \
+    printf 'DPkg::Use-Pty "false";\n' > "${__BUILD_DIR__}/etc/apt/apt.conf.d/90docker-no-dpkg-output" && \
+    printf 'Acquire::Languages "none";\n' > "${__BUILD_DIR__}/etc/apt/apt.conf.d/90docker-no-languages" && \
+    printf 'Acquire::GzipIndexes "true";\nAcquire::CompressionTypes::Order:: "gz";\n' > "${__BUILD_DIR__}/etc/apt/apt.conf.d/90docker-gzip-indexes" && \
+    printf 'APT::AutoRemove::SuggestsImportant "false";\n' > "${__BUILD_DIR__}/etc/apt/apt.conf.d/90docker-autoremove-suggests" && \
+    printf 'APT::Install-Recommends "false";\n' > "${__BUILD_DIR__}/etc/apt/apt.conf.d/90docker-no-recommends" && \
+    printf 'force-unsafe-io\n' > "${__BUILD_DIR__}/etc/dpkg/dpkg.cfg.d/90docker-apt-speedup" && \
+    printf 'path-exclude=/usr/share/doc/*\npath-exclude=/usr/share/info/*\npath-exclude=/usr/share/locale/*\npath-exclude=/usr/share/man/*\npath-include=/usr/share/doc/*/copyright\n' > "${__BUILD_DIR__}/etc/dpkg/dpkg.cfg.d/90docker-excludes" && \
+    echo '' > "${__BUILD_DIR__}/etc/resolv.conf" && \
+    echo 'host' > "${__BUILD_DIR__}/etc/hostname" && \
+    :> "${__BUILD_DIR__}/etc/machine-id" && \
+    find "${__BUILD_DIR__}/etc" -path '*/systemd/system/*.wants/*' \( -type l -o -type f \) -delete && \
+    if [ -x "${__BUILD_DIR__}/usr/bin/dpkg-divert" ]; then chroot "${__BUILD_DIR__}/" dpkg-divert --local --rename --add /sbin/initctl; fi && \
+    printf '#!/bin/sh\nexit 101\n' > "${__BUILD_DIR__}/usr/sbin/policy-rc.d" && \
+    printf '#!/bin/sh\nexit 0\n' > "${__BUILD_DIR__}/sbin/initctl" && \
+    chmod 0755 "${__BUILD_DIR__}/usr/sbin/policy-rc.d" "${__BUILD_DIR__}/sbin/initctl" && \
+    rm -rf "${__BUILD_DIR__}/usr/share/info"/* && \
+    rm -rf "${__BUILD_DIR__}/usr/share/man"/* && \
+    rm -rf "${__BUILD_DIR__}/var/cache/apt"/* && \
+    rm -rf "${__BUILD_DIR__}/var/lib/apt/lists"/* && \
+    rm -rf "${__BUILD_DIR__}/var/log"/* && \
+    rm -rf "${__BUILD_DIR__}/dev"/.??* && \
+    rm -rf "${__BUILD_DIR__}/home"/.??* && \
+    rm -rf "${__BUILD_DIR__}/root"/.??* && \
+    rm -rf "${__BUILD_DIR__}/tmp"/.??* && \
+    rm -rf "${__BUILD_DIR__}/boot" && \
+    rm -rf "${__BUILD_DIR__}/proc" && \
+    rm -rf "${__BUILD_DIR__}/sys" && \
+    find "${__BUILD_DIR__}/usr/lib/x86_64-linux-gnu/gconv" -mindepth 1 -maxdepth 1 -type f -not -name 'UTF*' -delete && \
+    find "${__BUILD_DIR__}/usr/share/locale" -mindepth 1 -maxdepth 1 -type d -not \( -name 'en' -o -name 'en_US' \) -exec rm -r {} + && \
+    find "${__BUILD_DIR__}/usr/share/doc" -mindepth 1 -not -type d -not \( -iname 'COPYING*' -o -iname 'GPL' -o -iname '*LICENSE*' -o -iname 'copyright' \) -delete && \
+    find "${__BUILD_DIR__}/usr/share/doc" -mindepth 1 -type d -empty -delete && \
+    find "${__BUILD_DIR__}/var/cache" -type f -delete ; \
+  } && \
+# licenses
+  echo '=== project licenses ===' && \
+  time { \
+    install --owner=${__USER__} --group=${__USER__} --mode=0644 --target-directory="${__BUILD_DIR__}/licenses" "${__WORK_DIR__}/LICENSE" ; \
+  } && \
 # done
   echo '=== all done! ==='
 
@@ -154,17 +139,20 @@ RUN \
 
 FROM scratch
 
+ARG __BUILD_DIR__
+
 LABEL \
   maintainer="Frederico Martins <https://hub.docker.com/u/fscm/>" \
   vendor="fscm" \
-  cmd="docker container run --interactive --rm --tty fscm/debian" \
+  cmd="docker container run --interactive --rm --tty fscm/debian:stretch" \
   params=""
-
-COPY --from=second_stage "/" "/"
 
 ENV \
   LANG="C.UTF-8" \
+  LC_ALL="C.UTF-8" \
   DEBCONF_NONINTERACTIVE_SEEN="true" \
   DEBIAN_FRONTEND="noninteractive"
+
+COPY --from=build "${__BUILD_DIR__}" "/"
 
 CMD ["/bin/bash"]
