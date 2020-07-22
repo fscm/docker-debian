@@ -125,6 +125,11 @@ RUN \
   time { \
     install --owner=${__USER__} --group=${__USER__} --mode=0644 --target-directory="${__BUILD_DIR__}/licenses" "${__WORK_DIR__}/LICENSE" ; \
   } && \
+# check version
+  echo '=== os version ===' && \
+  time { \
+    cat "${__BUILD_DIR__}/etc/debian_version" ; \
+  } && \
 # done
   echo '=== all done! ==='
 

@@ -7,7 +7,7 @@ FROM debian:stretch as build
 
 ARG __BUILD_DIR__
 ARG OS_CODENAME="stretch"
-ARG OS_VERSION="9.12"
+ARG OS_VERSION="9.13"
 ARG __USER__="root"
 ARG __WORK_DIR__="/work"
 
@@ -129,6 +129,11 @@ RUN \
   echo '=== project licenses ===' && \
   time { \
     install --owner=${__USER__} --group=${__USER__} --mode=0644 --target-directory="${__BUILD_DIR__}/licenses" "${__WORK_DIR__}/LICENSE" ; \
+  } && \
+# check version
+  echo '=== os version ===' && \
+  time { \
+    cat "${__BUILD_DIR__}/etc/debian_version" ; \
   } && \
 # done
   echo '=== all done! ==='
