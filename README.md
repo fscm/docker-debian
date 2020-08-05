@@ -26,7 +26,8 @@ installed on a regular Debian Linux image.
 - `10.1.0`
 - `10.2.0`
 - `10.3.0`
-- `10.4.0`, `buster`, `latest`
+- `10.4.0`
+- `10.5.0`, `buster`, `latest`
 
 ## What is Debian?
 
