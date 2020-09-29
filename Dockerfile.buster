@@ -7,7 +7,7 @@ FROM debian:buster as build
 
 ARG __BUILD_DIR__
 ARG OS_CODENAME="buster"
-ARG OS_VERSION="10.5"
+ARG OS_VERSION="10.6"
 ARG __USER__="root"
 ARG __WORK_DIR__="/work"
 
@@ -20,7 +20,7 @@ ENV \
 USER ${__USER__}
 
 #COPY --chown="${__USER__}":${__USER__} "LICENSE" "files/" "${__WORK_DIR__}/"
-COPY "LICENSE" "files/" "${__WORK_DIR__}/"
+COPY "LICENSE" "files/" "${__WORK_DIR__}"/
 
 WORKDIR "${__WORK_DIR__}"
 
