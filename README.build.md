@@ -42,7 +42,7 @@ docker image build --force-rm --no-cache --quiet --file <VARIANT>/Dockerfile --t
 A build example:
 
 ```
-docker image build --force-rm --no-cache --quiet --file Dockerfile.buster --tag johndoe/my_debian:buster .
+docker image build --force-rm --no-cache --quiet --file buster/Dockerfile --tag johndoe/my_debian:buster .
 ```
 
 To clean any _<none>_ image(s) left by the build process the following

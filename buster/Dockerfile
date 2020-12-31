@@ -7,7 +7,7 @@ FROM debian:buster as build
 
 ARG __BUILD_DIR__
 ARG OS_CODENAME="buster"
-ARG OS_VERSION="10.6"
+ARG OS_VERSION="10.7"
 ARG __USER__="root"
 ARG __WORK_DIR__="/work"
 
