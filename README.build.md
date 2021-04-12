@@ -29,7 +29,7 @@ Docker installation instructions can be found
 In order to create a Docker image using this Dockerfiles you need to run the
 `docker` command with a few options.
 
-```
+```shell
 docker image build --force-rm --no-cache --quiet --file <VARIANT>/Dockerfile --tag <USER>/<IMAGE>:<TAG> <PATH>
 ```
 
@@ -41,20 +41,20 @@ docker image build --force-rm --no-cache --quiet --file <VARIANT>/Dockerfile --t
 
 A build example:
 
-```
+```shell
 docker image build --force-rm --no-cache --quiet --file buster/Dockerfile --tag johndoe/my_debian:buster .
 ```
 
-To clean any _<none>_ image(s) left by the build process the following
+To clean any _`none`_ image(s) left by the build process the following
 command can be used:
 
-```
+```shell
 docker image rm `docker image ls --filter "dangling=true" --quiet`
 ```
 
 You can also use the following command to achieve the same result:
 
-```
+```shell
 docker image prune -f
 ```
 
@@ -62,7 +62,7 @@ docker image prune -f
 
 Additional tags can be added to the image using the following command:
 
-```
+```shell
 docker image tag <image_id> <user>/<image>:<extra_tag>
 ```
 
@@ -72,19 +72,19 @@ After adding an image to Docker, that image can be pushed to a Docker registry..
 
 Make sure that you are logged in to the service.
 
-```
+```shell
 docker login
 ```
 
 When logged in, an image can be pushed using the following command:
 
-```
+```shell
 docker image push <user>/<image>:<tag>
 ```
 
 Extra tags can also be pushed.
 
-```
+```shell
 docker image push <user>/<image>:<extra_tag>
 ```
 

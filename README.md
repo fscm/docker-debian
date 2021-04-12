@@ -8,9 +8,9 @@ installed on a regular Debian Linux image.
 
 ## Supported tags
 
-- `jessie`
-- `stretch`
-- `buster`, `latest`
+* `jessie`
+* `stretch`
+* `buster`, `latest`
 
 ## What is Debian?
 
@@ -37,7 +37,7 @@ Docker installation instructions can be found
 To start a container with this image and run a shell use the following
 command (the container will be deleted after exiting the shell):
 
-```
+```shell
 docker container run --rm --interactive --tty fscm/debian bash
 ```
 
