@@ -8,9 +8,10 @@ installed on a regular Debian Linux image.
 
 ## Supported tags
 
-* `jessie`
-* `stretch`
-* `buster`, `latest`
+- `jessie`
+- `stretch`
+- `buster`
+- `bullseye`, `latest`
 
 ## What is Debian?
 
@@ -53,7 +54,7 @@ available, see the [tags on this repository](https://github.com/fscm/docker-debi
 
 ## Authors
 
-* **Frederico Martins** - [fscm](https://github.com/fscm)
+- **Frederico Martins** - [fscm](https://github.com/fscm)
 
 See also the list of [contributors](https://github.com/fscm/docker-debian/contributors)
 who participated in this project.
