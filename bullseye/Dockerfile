@@ -7,7 +7,7 @@ FROM debian:bullseye as build
 
 ARG __BUILD_DIR__
 ARG OS_CODENAME="bullseye"
-ARG OS_VERSION="11.0"
+ARG OS_VERSION="11.1"
 ARG __USER__="root"
 ARG __WORK_DIR__="/work"
 
