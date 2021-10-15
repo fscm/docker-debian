@@ -9,9 +9,11 @@ installed on a regular Debian Linux image.
 ## Supported tags
 
 - `jessie`
-- `stretch`
-- `buster`
-- `bullseye`, `latest`
+- [`stretch`](https://github.com/fscm/docker-debian/blob/master/stretch/Dockerfile)
+- [`buster`](https://github.com/fscm/docker-debian/blob/master/buster/Dockerfile)
+- [`bullseye`][latest], [`latest`][latest]
+
+[latest]: https://github.com/fscm/docker-debian/blob/master/bullseye/Dockerfile
 
 ## What is Debian?
 
