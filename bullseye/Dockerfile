@@ -1,6 +1,6 @@
 # global args
 ARG __BUILD_DIR__="/build"
-ARG OS_VERSION="11.2.0"
+ARG OS_VERSION="11.3.0"
 
 
 
