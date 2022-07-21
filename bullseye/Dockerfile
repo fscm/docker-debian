@@ -1,6 +1,6 @@
 # global args
 ARG __BUILD_DIR__="/build"
-ARG OS_VERSION="11.3.0"
+ARG OS_VERSION="11.4.0"
 
 
 
@@ -96,13 +96,13 @@ RUN \
     rm -rf "${__BUILD_DIR__}/var/log"/* && \
     rm -rf "${__BUILD_DIR__}/dev"/.??* && \
     rm -rf "${__BUILD_DIR__}/home"/.??* && \
-    rm -rf "${__BUILD_DIR__}/root"/.??* && \
+    # rm -rf "${__BUILD_DIR__}/root"/.??* && \
     rm -rf "${__BUILD_DIR__}/tmp"/.??* && \
     rm -rf "${__BUILD_DIR__}/boot" && \
     rm -rf "${__BUILD_DIR__}/proc" && \
     rm -rf "${__BUILD_DIR__}/sys" && \
-    find "${__BUILD_DIR__}/usr/lib/`arch`-linux-gnu/gconv" -mindepth 1 -maxdepth 1 -type f -not -name 'UTF*' -delete && \
-    find "${__BUILD_DIR__}/usr/share/locale" -mindepth 1 -maxdepth 1 -type d -not \( -name 'en' -o -name 'en_US' \) -exec rm -r {} + && \
+    # find "${__BUILD_DIR__}/usr/lib/`arch`-linux-gnu/gconv" -mindepth 1 -maxdepth 1 -type f -not -name 'UTF*' -delete && \
+    find "${__BUILD_DIR__}/usr/share/locale" -mindepth 1 -maxdepth 1 -type d -not \( -name 'en' -o -name 'en_US' -o -name 'locale.alias' \) -exec rm -r {} + && \
     find "${__BUILD_DIR__}/usr/share/doc" -mindepth 1 -not -type d -not \( -iname 'COPYING*' -o -iname 'GPL' -o -iname '*LICENSE*' -o -iname 'copyright' \) -delete && \
     find "${__BUILD_DIR__}/usr/share/doc" -mindepth 1 -type d -empty -delete && \
     find "${__BUILD_DIR__}/var/cache" -type f -delete && \
